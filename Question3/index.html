@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GOT</title>
+    <style>
+        #container {
+            text-align: center;
+        }
+
+        input {
+            border: 2px solid #7f7c7c;
+            padding: 7px;
+        }
+
+        button {
+            border: 2px solid #252525;
+            padding: 7px;
+            background: #464646;
+            color: #e0e0e0;
+        }
+
+        #member-result, #house-result {
+            text-align: left;
+            width: 500px;
+            display: inline-block;
+        }
+
+    </style>
+</head>
+<body>
+<div id="container">
+
+    <input type="text"
+           name="search_term"
+           placeholder="Enter a search term"
+           id="search_term">
+    <br/>
+    <br/>
+    <div id="#search-btns">
+        <button onclick="char()">Search By Character</button>
+        <button onclick="house()">Search By House</button>
+        <button onclick="random_char_for_house()">Random Character From Given House</button>
+    </div>
+    <br/>
+    <div id="random-btns">
+        <button onclick="random_char()">Get Random Character</button>
+        <button onclick="random_house()">Get Random House</button>
+    </div>
+
+    <div id="member-result">
+
+    </div>
+
+    <div id="house-result">
+        Name: <p id="hname"></p>
+        Region: <p id="region"></p>
+        Coat of arms: <p id="coatOfArms"></p>
+        Words: <p id="words"></p>
+    </div>
+
+    <div id="no-result">
+        <h1>No result found</h1>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    var tot_houses;
+    var tot_characters;
+
+    $(document).ready(() => {
+        $("#house-result").hide();
+        $("#member-result").hide();
+        $("#no-result").hide();
+        $.ajax("https://www.anapioficeandfire.com/api/houses?pageSize=1", {
+            success: function (data, textStatus, request) {
+                let link_header = request.getResponseHeader('link');
+                let links = link_header.split(",");
+                let regex = /.*?page=([0-9]*)&/g;
+                let match = regex.exec(links[2]);
+                tot_houses = parseInt(match[1], 10);
+            },
+            error: function (request, textStatus, errorThrown) {
+                console.error(request.getResponseHeader('link'));
+            }
+        });
+        $.ajax("https://www.anapioficeandfire.com/api/characters?pageSize=1", {
+            success: function (data, textStatus, request) {
+                let link_header = request.getResponseHeader('link');
+                let links = link_header.split(",");
+                let regex = /.*?page=([0-9]*)&/g;
+                let match = regex.exec(links[2]);
+                tot_characters = parseInt(match[1], 10);
+            },
+            error: function (request, textStatus, errorThrown) {
+                console.error(request.getResponseHeader('link'));
+            }
+        });
+    });
+
+    function char() {
+        // eg https://www.anapioficeandfire.com/api/characters?name=Jon Snow
+        let character_name = $("#search_term").val();
+        if (!character_name) {
+            alert("Input field can't be empty");
+            return;
+        }
+
+        const url = "https://anapioficeandfire.com/api/characters?name=" + character_name;
+        get(url).then(JSON.parse)
+            .then((res) => {
+                console.log(res);
+                return res[0];
+            })
+            .then((member) => {
+                showMember(member);
+            });
+    }
+
+    function house() {
+        // eg https://www.anapioficeandfire.com/api/houses?name=House Baelish of Harrenhal
+        let house_name = $("#search_term").val();
+        if (!house_name) {
+            alert("Input field can't be empty");
+            return;
+        }
+
+        const url = "https://anapioficeandfire.com/api/houses?name=" + house_name;
+        get(url).then(JSON.parse)
+            .then((res) => {
+                console.log(res);
+                return res[0];
+            })
+            .then((house) => {
+                showHouse(house);
+            });
+    }
+
+    function random_char() {
+        // Total number of characters at present = 2138
+        // How we got total no.of chars and houses?
+        // see readme for possible ways
+        const random_id = Math.floor((Math.random() * tot_characters) + 1);
+        const url = "https://anapioficeandfire.com/api/characters/" + random_id;
+        get(url).then(JSON.parse)
+            .then((res) => {
+                showMember(res);
+            });
+    }
+
+    function random_house() {
+        // Total number of houses = 444
+        const random_id = Math.floor((Math.random() * tot_houses) + 1);
+        const url = "https://anapioficeandfire.com/api/houses/" + random_id;
+        get(url)
+            .then(JSON.parse)
+            .then((res) => {
+                showHouse(res);
+            });
+    }
+
+    function random_char_for_house() {
+        let house_name = $("#search_term").val();
+        if (!house_name) {
+            alert("Input field can't be empty");
+            return;
+        }
+
+        const url = "https://anapioficeandfire.com/api/houses?name=" + house_name;
+
+        get(url).then(JSON.parse)
+            .then((response) => {
+                // get the first house
+                const house = response[0];
+                if (!house) {
+                    showHouse(house);
+                    throw Error("No such House");
+                }
+                const members = response[0].swornMembers;
+                console.log("Members", members);
+                return members;
+            })
+            .then((members) => {
+                // fetch a random member
+                let index = Math.floor((Math.random() * members.length));
+                console.log("Fetching member: ", members[index]);
+                return members[index];
+            })
+            .then((url) => {
+                get(url)
+                    .then(JSON.parse)
+                    .then((res) => {
+                        showMember(res);
+                    });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
+    function switch_div(div) {
+        $("#no-result").hide();
+        $("#house-result").hide();
+        $("#member-result").hide();
+        div.show();
+    }
+
+    function showMember(member) {
+        if (!member) {
+            switch_div($("#no-result"));
+            return;
+        }
+
+        let text = '<fieldset><legend>Character</legend>';
+
+        if (member.name)
+            text += 'Name: <span id="name">' + member.name + '</span><br/>';
+        if (member.gender)
+            text += 'Gender: <span id="gender">' + member.gender + '</span><br/>';
+        if (member.culture)
+            text += 'Culture: <span id="culture">' + member.culture + '</span><br/>';
+        if (member.born)
+            text += 'Born: <span id="born">' + member.born + '</span>';
+
+        text += '</fieldset>';
+
+        switch_div($("#member-result"));
+        $("#member-result").html(text);
+    }
+
+    function showHouse(house) {
+        if (!house) {
+            switch_div($("#no-result"));
+            return;
+        }
+
+
+        let text = '<fieldset><legend>House</legend>';
+
+        if (house.name)
+            text += 'Name: <span id="hname">' + house.name + '</span><br/>';
+        if (house.region)
+            text += 'Region: <span id="region">' + house.region + '</span><br/>';
+        if (house.coatOfArms)
+            text += 'Coat of arms: <span id="coatOfArms">' + house.coatOfArms + '</span><br/>';
+        if (house.words)
+            text += 'Words: <span id="words">' + house.words + '</span>';
+
+        text += '</fieldset>';
+
+        switch_div($("#house-result"));
+        $("#house-result").html(text);
+    }
+
+    function get(url) {
+        console.log("URL: ", url);
+        // return a promise
+        return new Promise(function (resolve, reject) {
+            var req = new XMLHttpRequest();
+            req.open('GET', url);
+
+            req.onload = function () {
+                if (req.status === 200) {
+                    resolve(req.response);
+                } else {
+                    reject(Error(req.statusText));
+                }
+            };
+
+            req.onerror = function () {
+                reject(Error("Network Error"))
+            };
+
+            // make the request
+            req.send();
+        });
+    }
+</script>
+</body>
+</html>
