@@ -1,0 +1,18 @@
+<html>
+<head>
+<style>
+p {
+   background: red;
+}
+</style>
+</head>
+<body>
+<p> How you doing</p>
+<button onclick="func()">Click me</button>
+<script>
+function func() {
+   alert("Hehehe");
+}
+</script>
+</body>
+</html>
