@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Xkcd Clone</title>
+    <style>
+        #main {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div id="main">
+    <div id="nav-bar">
+        <button onclick="fetchFirst()">First</button>
+        <button onclick="fetchPrev()">Prev</button>
+        <button onclick="fetchRandom()">Random</button>
+        <button onclick="fetchNext()">Next</button>
+        <button onclick="fetchLast()">Last</button>
+    </div>
+
+    <p id="title"></p>
+    <img id="comic-img">
+</div>
+<script>
+    // latest comic url = "http://xkcd.com/info.0.json"
+    // specific comic url = "http://xkcd.com/{id}/info.0.json"
+
+    var current_id;
+    var last_id;    // will be set on page load
+
+    function send_ajax_request(url) {
+        console.log("Request URL: ", url);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.send();
+
+        xhr.onreadystatechange = (e) => {
+            const res = JSON.parse(xhr.responseText);
+            console.log(res);
+
+            // set image
+            document.getElementById("comic-img").src = res.img;
+            document.getElementById("comic-img").alt = res.title;   // set alt = title
+            document.getElementById("comic-img").title = res.alt;   // and title = alt. it's NOT a bug
+
+            // set title
+            document.getElementById("title").innerText = res.title;
+            current_id = res.num;
+        }
+    }
+
+
+    function fetchFirst() {
+        const url = "https://xkcd.com/" + (1) + "/info.0.json";
+        send_ajax_request(url);
+    }
+
+    function fetchPrev() {
+        if (current_id === 1)
+            return;
+
+        const url = "https://xkcd.com/" + (current_id - 1) + "/info.0.json";
+        send_ajax_request(url);
+    }
+
+    function fetchRandom() {
+        // Generate a random number in the range [1..last_id]
+        const random_id = Math.floor((Math.random() * last_id) + 1);
+        const url = "https://xkcd.com/" + (random_id) + "/info.0.json";
+        send_ajax_request(url);
+    }
+
+    function fetchNext() {
+        if (current_id === last_id)
+            return;
+
+        const url = "https://xkcd.com/" + (current_id + 1) + "/info.0.json";
+        send_ajax_request(url);
+    }
+
+
+    /**
+     * fetches the last (latest) comic
+     */
+    function fetchLast() {
+        // TODO: find a way to use send_ajax_request() here as well
+
+        const xhr = new XMLHttpRequest();
+        const url = "https://xkcd.com/info.0.json";
+        xhr.open("GET", url, true);
+        xhr.send();
+
+        xhr.onreadystatechange = () => {
+            // FIXME: Though this works fine, it logs an exception in console. RCA?
+            const res = JSON.parse(xhr.responseText);
+            console.log(res);
+            document.getElementById("title").innerText = res.title;
+            document.getElementById("comic-img").src = res.img;
+            document.getElementById("comic-img").alt = res.title;   // set alt = title
+            document.getElementById("comic-img").title = res.alt;   // and title = alt. it's NOT a bug
+
+            current_id = res.num;
+            last_id = current_id;   // FIXME: can't use our generic send_ajax_request() method due to this line.
+        }
+    }
+
+    // on page load we fetch the latest comic
+    fetchLast();
+
+</script>
+</body>
+</html>
