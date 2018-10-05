@@ -34,23 +34,25 @@
 
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
-        xhr.send();
 
         xhr.onreadystatechange = (e) => {
-            const res = JSON.parse(xhr.responseText);
-            console.log(res);
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const res = JSON.parse(xhr.responseText);
+                console.log(res);
 
-            // set image
-            document.getElementById("comic-img").src = res.img;
-            document.getElementById("comic-img").alt = res.title;   // set alt = title
-            document.getElementById("comic-img").title = res.alt;   // and title = alt. it's NOT a bug
+                // set image
+                document.getElementById("comic-img").src = res.img;
+                document.getElementById("comic-img").alt = res.title;   // set alt = title
+                document.getElementById("comic-img").title = res.alt;   // and title = alt. it's NOT a bug
 
-            // set title
-            document.getElementById("title").innerText = res.title;
-            current_id = res.num;
-        }
+                // set title
+                document.getElementById("title").innerText = res.title;
+                current_id = res.num;
+            }
+        };
+
+        xhr.send();
     }
-
 
     function fetchFirst() {
         const url = "https://xkcd.com/" + (1) + "/info.0.json";
@@ -90,20 +92,21 @@
         const xhr = new XMLHttpRequest();
         const url = "https://xkcd.com/info.0.json";
         xhr.open("GET", url, true);
-        xhr.send();
 
         xhr.onreadystatechange = () => {
-            // FIXME: Though this works fine, it logs an exception in console. RCA?
-            const res = JSON.parse(xhr.responseText);
-            console.log(res);
-            document.getElementById("title").innerText = res.title;
-            document.getElementById("comic-img").src = res.img;
-            document.getElementById("comic-img").alt = res.title;   // set alt = title
-            document.getElementById("comic-img").title = res.alt;   // and title = alt. it's NOT a bug
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const res = JSON.parse(xhr.responseText);
+                console.log(res);
+                document.getElementById("title").innerText = res.title;
+                document.getElementById("comic-img").src = res.img;
+                document.getElementById("comic-img").alt = res.title;   // set alt = title
+                document.getElementById("comic-img").title = res.alt;   // and title = alt. it's NOT a bug
 
-            current_id = res.num;
-            last_id = current_id;   // FIXME: can't use our generic send_ajax_request() method due to this line.
-        }
+                current_id = res.num;
+                last_id = current_id;   // FIXME: can't use our generic send_ajax_request() method due to this line.
+            }
+        };
+        xhr.send();
     }
 
     // on page load we fetch the latest comic
