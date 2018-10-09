@@ -53,10 +53,6 @@
     </div>
 
     <div id="house-result">
-        Name: <p id="hname"></p>
-        Region: <p id="region"></p>
-        Coat of arms: <p id="coatOfArms"></p>
-        Words: <p id="words"></p>
     </div>
 
     <div id="no-result">
@@ -182,6 +178,11 @@
                 return members;
             })
             .then((members) => {
+                if (!members || members.length === 0) {
+                    showHouse(null);
+                    throw Error("No memebrs in this house");
+                }
+
                 // fetch a random member
                 let index = Math.floor((Math.random() * members.length));
                 console.log("Fetching member: ", members[index]);
