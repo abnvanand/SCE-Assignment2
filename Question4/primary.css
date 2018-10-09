@@ -50,7 +50,7 @@ body {
     width: 2px;
     height: 120px;
     margin-top: -36px;
-    background: #8e8e8e;
+    background: #892525;
     transform: rotate(0deg) translate(-50%, -50%);
     transform-origin: 0 36px;
 }
@@ -64,4 +64,36 @@ body {
     background-color: #252525;
     border-radius: 100%;
     transform: translate(-50%, -50%);
+}
+
+#twelve {
+    position: absolute;
+    left: 50%;
+    top: 5%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+}
+
+#three {
+    position: absolute;
+    left: 96%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+}
+
+#six {
+    position: absolute;
+    left: 50%;
+    top: 95%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+}
+
+#nine {
+    position: absolute;
+    left: 4%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
 }

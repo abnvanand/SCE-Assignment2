@@ -4,17 +4,14 @@ const secondHand = document.getElementById("second-hand");
 
 function tick() {
     let date = new Date();
-    let hrs, mins, sec, degree;
+    let hrs = date.getHours(), mins = date.getMinutes(), sec = date.getSeconds(), degree;
 
-    hrs = date.getHours();
     degree = (hrs / 12) * 360;
     hourHand.style.transform = `rotate(${degree}deg) translate(-50%, -50%)`;
 
-    mins = date.getMinutes();
     degree = (mins / 60) * 360;
     minuteHand.style.transform = `rotate(${degree}deg) translate(-50%, -50%)`;
 
-    sec = date.getSeconds();
     degree = (sec / 60) * 360;
     secondHand.style.transform = `rotate(${degree}deg) translate(-50%, -50%)`;
 
